@@ -3,11 +3,19 @@ package org.example.demo1;
 //package com.example.inventory;
 
 //package com.example.inventory;
+import com.itextpdf.kernel.pdf.PdfDocument;
+import com.itextpdf.kernel.pdf.PdfWriter;
 
+import com.itextpdf.layout.Document;
+import com.itextpdf.layout.element.Paragraph;
+import com.itextpdf.layout.element.Table;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 
+
+import java.time.LocalDateTime;
 import java.util.List;
 
 public class MainController {
@@ -18,14 +26,14 @@ public class MainController {
     @FXML private TableColumn<Product, Integer> colCurrentStock;
     @FXML private TableColumn<Product, Integer> colReorderLevel;
 
-    @FXML private TextField txtName;
+    @FXML private TextField txtName; //product name
     @FXML private TextField txtDescription;
     @FXML private TextField txtCategoryId;
     @FXML private TextField txtSupplierId;
     @FXML private TextField txtCostPrice;
     @FXML private TextField txtSellingPrice;
     @FXML private TextField txtReorderLevel;
-    @FXML private TextField txtTransactionQty;
+    @FXML private TextField txtTransactionQty; //quantity
 
     // -- SUPPLIERS --
     @FXML private TableView<Supplier> supplierTable;
@@ -48,6 +56,50 @@ public class MainController {
     @FXML private TextField txtCategoryName;
     @FXML private TextField txtCategoryDescription;
 
+
+    @FXML private TableView<TransactionView> transactionTable;
+    @FXML private TableColumn<TransactionView, Integer> colTxId;
+    @FXML private TableColumn<TransactionView, String> colProductName1;
+    @FXML private TableColumn<TransactionView, String> colTransactionType;
+    @FXML private TableColumn<TransactionView, Integer> colQuantity;
+    @FXML private TableColumn<TransactionView, String> colSupplierName1;
+    @FXML private TableColumn<TransactionView, String> colDate;
+
+
+
+//    private BlockchainService blockchainService;
+//
+//    public MainController() {
+//        try {
+//            blockchainService = new BlockchainService(); // Initialize the blockchain service
+//        } catch (Exception e) {
+//
+//        }
+//    }
+//
+//    private void handleTransaction(String transactionType) {
+//        try {
+//            // Get inputs from the UI
+//            String itemName = txtName.getText();
+//            int transactionQty = Integer.parseInt(txtTransactionQty.getText());
+//
+//            // Ensure the inputs are valid
+//            if (itemName.isEmpty() || transactionQty <= 0) {
+//                //showError("Please enter valid item details and transaction quantity.");
+//                return;
+//            }
+//
+//            // Log transaction to the blockchain
+//            blockchainService.logTransaction(itemName, transactionQty, transactionType.toLowerCase());
+//            //showInfo(transactionType + " transaction logged successfully!");
+//
+//        } catch (NumberFormatException e) {
+//           // showError("Invalid quantity. Please enter a number.");
+//        } catch (Exception e) {
+//            //showError("Error logging transaction: " + e.getMessage());
+//        }
+//    }
+
     @FXML
     public void initialize() {
         // ========== PRODUCT TABLE SETUP ==========
@@ -55,6 +107,23 @@ public class MainController {
         colProductName.setCellValueFactory(new PropertyValueFactory<>("productName"));
         colCurrentStock.setCellValueFactory(new PropertyValueFactory<>("currentStock"));
         colReorderLevel.setCellValueFactory(new PropertyValueFactory<>("reorderLevel"));
+
+
+
+        colTxId.setCellValueFactory(new PropertyValueFactory<>("transactionId"));
+        colProductName1.setCellValueFactory(new PropertyValueFactory<>("productName"));
+        colTransactionType.setCellValueFactory(new PropertyValueFactory<>("transactionType"));
+        colQuantity.setCellValueFactory(new PropertyValueFactory<>("quantity"));
+        colSupplierName1.setCellValueFactory(new PropertyValueFactory<>("supplierName"));
+
+
+        // For date, we can store as a LocalDateTime but show as string
+        colDate.setCellValueFactory(cellData -> {
+            LocalDateTime ldt = cellData.getValue().getTransactionDate();
+            return new SimpleStringProperty(ldt.toString());
+        });
+
+
 
         // CUSTOM CELL FACTORY: HIGHLIGHT LOW STOCK IN RED
         colCurrentStock.setCellFactory(column -> new TableCell<Product, Integer>() {
@@ -92,6 +161,61 @@ public class MainController {
         refreshAllTables();
     }
 
+    //generate pdf
+    @FXML
+    private void onExportPDF() {
+        // Use any PDF library, e.g., iText or Apache PDFBox
+        // Example using iText 7 (pseudo-code):
+        String dest = "TransactionHistory.pdf";
+        try {
+            PdfWriter writer = new PdfWriter(dest);
+            PdfDocument pdf = new PdfDocument(writer);
+            Document document = new Document(pdf);
+
+            // Add title
+            document.add(new Paragraph("Transaction History Report")
+                    .setFontSize(14));
+
+            // Create a table with number of columns matching your data
+            Table table =
+                    new Table(new float[]{50, 150, 70, 70, 120, 150});
+            table.setWidth(100);
+
+            // Add header cells
+            table.addHeaderCell("Tx ID");
+            table.addHeaderCell("Product");
+            table.addHeaderCell("Type");
+            table.addHeaderCell("Qty");
+            table.addHeaderCell("Supplier");
+            table.addHeaderCell("Date");
+
+            // Loop your transactionTable data
+            for (TransactionView tv : transactionTable.getItems()) {
+                table.addCell(String.valueOf(tv.getTransactionId()));
+                table.addCell(tv.getProductName());
+                table.addCell(tv.getTransactionType());
+                table.addCell(String.valueOf(tv.getQuantity()));
+                table.addCell(tv.getSupplierName());
+                table.addCell(tv.getTransactionDate().toString());
+            }
+
+            document.add(table);
+            document.close();
+
+            showAlert(Alert.AlertType.INFORMATION, "PDF Exported Successfully to " + dest);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            showAlert(Alert.AlertType.ERROR, "Error generating PDF: " + e.getMessage());
+        }
+    }
+
+    // Modify refreshAllTables or create a new method to load transaction data:
+    private void refreshTransactionTable() {
+        List<TransactionView> txList = TransactionDAO.getAllTransactionViews();
+        transactionTable.getItems().setAll(txList);
+    }
+
     private void refreshAllTables() {
         // PRODUCTS
         productTable.getItems().setAll(ProductDAO.getAllProducts());
@@ -113,6 +237,8 @@ public class MainController {
             }
             showAlert(Alert.AlertType.WARNING, sb.toString());
         }
+
+        refreshTransactionTable();
     }
 
     // ---------------------------------------------------------------------------------------------
