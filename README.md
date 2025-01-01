@@ -1,5 +1,7 @@
 Rapport de Projet : Système de Gestion d’Inventaire avec Intégration Blockchain
+
  # 1. Contexte du Projet
+ cette projet est dans le context d'un gestion de stock dans un depo, et on a un stock manager qui supervise les stocks(les produits fournis par un fournisseur) entrer et sortie dans le depo.
 ## 1.1. Problème
 Les entreprises souhaitant gérer efficacement leurs stocks se heurtent à plusieurs difficultés :
 
