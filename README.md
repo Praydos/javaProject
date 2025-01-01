@@ -3,15 +3,15 @@ Rapport de Projet : Système de Gestion d’Inventaire avec Intégration Blockch
 ## 1.1. Problème
 Les entreprises souhaitant gérer efficacement leurs stocks se heurtent à plusieurs difficultés :
 
-Manque de visibilité sur l’historique des entrées et sorties de produits.
-Risques de pertes ou de fraudes liés à l’absence de traçabilité fiable.
+Manque de visibilité sur l’historique des entrées et sorties de produits. <br/>
+Risques de pertes ou de fraudes liés à l’absence de traçabilité fiable.<br/>
 Gestion incomplète des fournisseurs et catégories, rendant la chaîne logistique moins transparente.
 ## 1.2. Solution
 Le projet propose un système de gestion d’inventaire complet, qui couple :
 
-Une application JavaFX pour la gestion quotidienne (produits, fournisseurs, catégories, transactions).
-Une base de données MySQL permettant la persistance rapide et la consultation en temps réel des informations.
-Une intégration blockchain (via Truffle et Ganache) afin de garantir la traçabilité immuable des transactions critiques (entrées/sorties de stock).
+Une application JavaFX pour la gestion quotidienne (produits, fournisseurs, catégories, transactions).<br/>
+Une base de données MySQL permettant la persistance rapide et la consultation en temps réel des informations.<br/>
+Une intégration blockchain (via Truffle et Ganache) afin de garantir la traçabilité immuable des transactions critiques (entrées/sorties de stock).<br/>
 L’objectif est de répondre aux exigences de performance, de fiabilité et d’auditabilité, tout en offrant une interface simple à utiliser.
 
 # 2. Analyse des Besoins
@@ -57,24 +57,9 @@ Trigger : Met à jour automatiquement current_stock dès qu’une transaction es
 Blockchain (Ganache) : Contrat intelligent (Inventory.sol) gérant la preuve immuable des transactions (fonction storeTransaction(...)).
 Web3j (côté Java) : Envoie les données clés au contrat lors de chaque transaction pour permettre l’enregistrement “on-chain”.
 ## 3.2. Schéma Simplifié
-mathematica
-Copier le code
- ┌───────────────┐   Create/Read/Update/Delete   ┌───────────────────┐
- │   JavaFX UI    │  ──────────────────────────▶  │     DAO Layer     │
- └───────────────┘                               └───────────────────┘
-             │                                         │
-             │ PDF Export      ┌───────────────────┐   │
-             ▼                 │     MySQL DB      │   ▼
-       ┌───────────────────┐   │ (transactions,    │   └─────────> Trigger update
-       │ iText ou PDFBox   │   │  products, etc.)  │
-       └───────────────────┘   └───────────────────┘
-             │
-             └─────────────────────────────────────────────────────────────────┐
-                                                                             │
-                                                                Blockchain (Ganache)
-                                                                via Truffle & Web3j
-                                                                             │
-                                                 storeTransaction(...)  <────┘
+
+![image](https://github.com/user-attachments/assets/61bfa3e0-4b99-4740-b327-e163b98acad6)
+
 
                                                  
 # 4. Gestion du Projet
